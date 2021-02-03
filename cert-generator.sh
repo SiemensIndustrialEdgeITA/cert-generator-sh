@@ -30,19 +30,22 @@ organizationalUnitName=Local Developement
 emailAddress=
 "
 # Our alternative names
-SANAMES="subjectAltName = DNS:$DOMAIN, DNS:portal.$DOMAIN, DNS:hub.$DOMAIN, relay.$DOMAIN" 
+SANAMES="subjectAltName = 	\
+DNS:$DOMAIN, 			\
+DNS:portal.$DOMAIN, 		\
+DNS:hub.$DOMAIN, 		\
+DNS:relay.$DOMAIN" 
 
 echo $SANAMES > san.ext
 
 # Generate our Private Key, CSR and Certificate
 openssl genrsa -out "$DOMAIN.key" 2048
-openssl req -new -subj "$(echo -n "$SUBJ" | tr "\n" "/")" -reqexts SAN \
-    -config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:portal.$DOMAIN,DNS:hub.$DOMAIN,DNS:relay.$DOMAIN"))  -key "$DOMAIN.key" -out "$DOMAIN.csr"
+openssl req -new -subj "$(echo -n "$SUBJ" | tr "\n" "/")" -key "$DOMAIN.key" -out "$DOMAIN.csr"
 openssl x509 -req -days 3650 -in "$DOMAIN.csr" -signkey "$DOMAIN.key" -out "$DOMAIN.crt" -extfile san.ext
 
 # Cleanup intermediate files
 rm "$DOMAIN.csr"
-#rm san.ext
+rm san.ext
 
 echo ""
 echo "Next manual steps:"
