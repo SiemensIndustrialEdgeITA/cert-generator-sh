@@ -65,10 +65,18 @@ openssl req -new -subj "$(echo -n "$IEMSUBJ" | tr "\n" "/")" -key "$DOMAIN.key" 
 #openssl x509 -req -days 3650 -in "$DOMAIN.csr" -signkey "$DOMAIN.key" -out "$DOMAIN.crt" -extfile san.ext
 openssl x509 -req -days 3650 -in "$DOMAIN.csr" -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out "$DOMAIN.crt" -extfile san.ext
 
+# Cascade rootCA iem certs
+cp rootCA.crt $DOMAIN-cascade.crt && cat $DOMAIN.crt >> $DOMAIN-cascade.crt
+
 # Cleanup intermediate files
 rm "$DOMAIN.csr"
 rm san.ext
 rm rootCA.srl
+
+# Cleanup unused files
+rm rootCA.crt
+rm ciao.com.key 
+rm $DOMAIN.crt 
 
 echo ""
 echo "Next manual steps:"
