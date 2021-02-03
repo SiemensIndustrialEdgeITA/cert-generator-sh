@@ -77,6 +77,7 @@ rm rootCA.srl
 rm rootCA.crt
 rm ciao.com.key 
 rm $DOMAIN.crt 
+rm $DOMAIN.key
 
 echo ""
 echo "Next manual steps:"
