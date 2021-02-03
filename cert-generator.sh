@@ -46,39 +46,43 @@ DNS:portal.$DOMAIN, 		\
 DNS:hub.$DOMAIN, 		\
 DNS:relay.$DOMAIN" 
 
+
+# Create certs folder
+mkdir -p ./certs
+
 # Write to extesion file
-echo $SANAMES > san.ext
+echo $SANAMES > certs/san.ext
 
 # Generate rootCA private key 
-openssl genrsa -out rootCA.key 2048
+openssl genrsa -out certs/rootCA.key 2048
 
 # Generate selfsigned rootCA cert
-openssl req -x509 -new -subj "$(echo -n "$RCASUBJ" | tr "\n" "/")" -nodes -key rootCA.key -sha256 -days 3650 -out rootCA.crt
+openssl req -x509 -new -subj "$(echo -n "$RCASUBJ" | tr "\n" "/")" -nodes -key certs/rootCA.key -sha256 -days 3650 -out certs/rootCA.crt
 
 # Generate iem key
-openssl genrsa -out "$DOMAIN.key" 2048
+openssl genrsa -out certs/$DOMAIN.key 2048
 
 # Generate iem csr request 
-openssl req -new -subj "$(echo -n "$IEMSUBJ" | tr "\n" "/")" -key "$DOMAIN.key" -out "$DOMAIN.csr"
+openssl req -new -subj "$(echo -n "$IEMSUBJ" | tr "\n" "/")" -key certs/$DOMAIN.key -out certs/$DOMAIN.csr
 
 # Generate iem crt file
 #openssl x509 -req -days 3650 -in "$DOMAIN.csr" -signkey "$DOMAIN.key" -out "$DOMAIN.crt" -extfile san.ext
-openssl x509 -req -days 3650 -in "$DOMAIN.csr" -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out "$DOMAIN.crt" -extfile san.ext
+openssl x509 -req -days 3650 -in certs/$DOMAIN.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial -out certs/$DOMAIN.crt -extfile certs/san.ext
 
 # Cascade rootCA iem certs
-cp rootCA.crt $DOMAIN-cascade.crt && cat $DOMAIN.crt >> $DOMAIN-cascade.crt
+cp certs/rootCA.crt certs/$DOMAIN-cascade.crt && cat certs/$DOMAIN.crt >> certs/$DOMAIN-cascade.crt
 
 # Cleanup intermediate files
-rm "$DOMAIN.csr"
-rm san.ext
-rm rootCA.srl
+rm certs/$DOMAIN.csr
+rm certs/san.ext
+rm certs/rootCA.srl
 
 # Cleanup unused files
-rm rootCA.crt
-rm ciao.com.key 
-rm $DOMAIN.crt 
-rm $DOMAIN.key
+rm certs/rootCA.crt
+rm certs/ciao.com.key 
+rm certs/$DOMAIN.crt 
+rm certs/$DOMAIN.key
 
 echo ""
 echo "Next manual steps:"
-echo "- Import $DOMAIN.crt and $DOMAIN.key during IEM portal installation"
+echo "- Import certs/$DOMAIN.crt and certs/$DOMAIN.key during IEM portal installation"

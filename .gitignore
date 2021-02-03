@@ -1,8 +1,2 @@
-# Ignore everything
-*
-
-# But not these files...
-!.gitignore
-!LICENSE
-!README.md
-!cert-generator.sh
+# Ignore certs
+certs
