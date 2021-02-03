@@ -13,4 +13,4 @@ Launch it passing your domain:
 ./cert-generator.sh ciao.com
 ```
 
-**.crt** and **.key** file will be generated.
+**ciao.com-cascade.crt** and **rootCA.key** file will be generated can be imported to IEM installation.
