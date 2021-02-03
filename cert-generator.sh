@@ -4,15 +4,20 @@
 DOMAIN=$1
 if [ -z "$1" ]; then 
 
-    echo "USAGE: $0 domain.lan"
-    echo ""
-    echo "This will generate a non-secure self-signed wildcard certificate for given domain."
-    echo "This should only be used in a development environment."
+    printf  "Industrial Edge Management cert-generator-sh\n"
+    printf  "\n"
+    printf  "USAGE: $0 domain.com\n"
+    printf  "\n"
+    printf  "This will generate a 10yr valid self-signed certificate for given <domain.com>. \nWith subdomains: \nportal.<domain.com> \nhub.<domain.com> \nrelay.<domain.com>\n"
+    printf  ""
     exit
 fi
 
 # Add wildcard
-WILDCARD="*.$DOMAIN"
+#DOMAIN="*.$DOMAIN"
+
+# Subj alternative names
+SAN=DNS:$DOMAIN, DNS:portal.$DOMAIN, DNS:hub.$DOMAIN, DNS:relay.$DOMAIN
 
 # Set our CSR variables
 SUBJ="
@@ -20,18 +25,25 @@ C=US
 ST=NY
 O=Local Developement
 localityName=Local Developement
-commonName=$WILDCARD
+commonName=$DOMAIN
 organizationalUnitName=Local Developement
 emailAddress=
 "
+# Our alternative names
+SANAMES="subjectAltName = DNS:$DOMAIN, DNS:portal.$DOMAIN, DNS:hub.$DOMAIN, relay.$DOMAIN" 
+
+echo $SANAMES > san.ext
 
 # Generate our Private Key, CSR and Certificate
 openssl genrsa -out "$DOMAIN.key" 2048
-openssl req -new -subj "$(echo -n "$SUBJ" | tr "\n" "/")" -key "$DOMAIN.key" -out "$DOMAIN.csr"
-openssl x509 -req -days 3650 -in "$DOMAIN.csr" -signkey "$DOMAIN.key" -out "$DOMAIN.crt"
+openssl req -new -subj "$(echo -n "$SUBJ" | tr "\n" "/")" -reqexts SAN \
+    -config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:portal.$DOMAIN,DNS:hub.$DOMAIN,DNS:relay.$DOMAIN"))  -key "$DOMAIN.key" -out "$DOMAIN.csr"
+openssl x509 -req -days 3650 -in "$DOMAIN.csr" -signkey "$DOMAIN.key" -out "$DOMAIN.crt" -extfile san.ext
+
+# Cleanup intermediate files
 rm "$DOMAIN.csr"
+#rm san.ext
 
 echo ""
 echo "Next manual steps:"
-echo "- Use $DOMAIN.crt and $DOMAIN.key to configure Apache/nginx"
-echo "- Import $DOMAIN.crt into Chrome settings: chrome://settings/certificates > tab 'Authorities'"
+echo "- Import $DOMAIN.crt and $DOMAIN.key during IEM portal installation"
