@@ -13,7 +13,7 @@ Launch it passing your domain:
 ./cert-generator.sh testcerts.com
 ```
 
-**./certs** folder will be created containing **testcerts.com-cascade.crt** and **rootCA.key** file will be generated can be imported to IEM installation:
+**./certs** folder will be created containing **testcerts.com-cascade.crt** and **testcerts.com.key** file will be generated can be imported to IEM installation:
 
 
 ## Import during IEM install

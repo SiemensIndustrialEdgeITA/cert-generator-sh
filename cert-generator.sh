@@ -16,9 +16,6 @@ fi
 # Add wildcard
 #DOMAIN="*.$DOMAIN"
 
-# Subj alternative names
-SAN=DNS:$DOMAIN, DNS:portal.$DOMAIN, DNS:hub.$DOMAIN, DNS:relay.$DOMAIN
-
 # Set our IEM CSR variables
 RCASUBJ="
 C=IT
@@ -70,7 +67,7 @@ openssl req -new -subj "$(echo -n "$IEMSUBJ" | tr "\n" "/")" -key certs/$DOMAIN.
 openssl x509 -req -days 3650 -in certs/$DOMAIN.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial -out certs/$DOMAIN.crt -extfile certs/san.ext
 
 # Cascade rootCA iem certs
-cp certs/rootCA.crt certs/$DOMAIN-cascade.crt && cat certs/$DOMAIN.crt >> certs/$DOMAIN-cascade.crt
+cp certs/$DOMAIN.crt certs/$DOMAIN-cascade.crt && cat certs/rootCA.crt >> certs/$DOMAIN-cascade.crt
 
 # Cleanup intermediate files
 rm certs/$DOMAIN.csr
@@ -79,9 +76,8 @@ rm certs/rootCA.srl
 
 # Cleanup unused files
 rm certs/rootCA.crt
-rm certs/ciao.com.key 
 rm certs/$DOMAIN.crt 
-rm certs/$DOMAIN.key
+rm certs/rootCA.key
 
 echo ""
 echo "Next manual steps:"
